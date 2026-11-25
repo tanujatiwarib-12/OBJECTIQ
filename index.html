@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OBJECTIQ — Real-Time Object Recognition Assistant</title>
+<style>
+:root{--bg:#080d18;--panel:#111b2d;--panel2:#17243a;--line:#253650;--text:#edf5ff;--muted:#8fa3bf;--cyan:#47d9e8;--blue:#7197ff;--green:#5ce0a2;--amber:#ffc36b;--red:#ff7188}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at 15% 0%,#142540 0,transparent 35%),var(--bg);font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:var(--text);min-height:100vh}
+button,input,select{font:inherit}button{cursor:pointer;border:0;transition:.18s ease}button:disabled{opacity:.45;cursor:not-allowed}
+.app{max-width:1440px;margin:auto;padding:22px}.topbar{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:22px}.brand{display:flex;align-items:center;gap:12px}.logo{height:46px;width:46px;border-radius:14px;display:grid;place-items:center;background:linear-gradient(140deg,var(--cyan),var(--blue));color:#06111e;font-size:24px;font-weight:900;box-shadow:0 8px 30px #47d9e82b}.brand h1{font-size:20px;letter-spacing:.08em;margin:0}.brand p{margin:3px 0 0;color:var(--muted);font-size:12px}.top-right{display:flex;gap:9px;align-items:center}.chip{border:1px solid var(--line);background:#0e1828;padding:8px 12px;border-radius:999px;color:var(--muted);font-size:12px}.chip.live{color:var(--green);border-color:#286e58}.dot{display:inline-block;width:7px;height:7px;background:var(--green);border-radius:50%;margin-right:7px}
+.hero{display:flex;align-items:flex-end;justify-content:space-between;gap:20px;margin:12px 0 22px}.eyebrow{font-size:11px;color:var(--cyan);font-weight:800;letter-spacing:.16em;text-transform:uppercase}.hero h2{font-size:clamp(27px,4vw,42px);letter-spacing:-.04em;margin:8px 0}.hero p{margin:0;max-width:700px;color:var(--muted);line-height:1.6;font-size:14px}.hero-badge{padding:13px 16px;border:1px solid #2b455f;border-radius:14px;background:#102035;color:#bdd6f2;white-space:nowrap;font-size:12px}
+.grid{display:grid;grid-template-columns:minmax(0,1.65fr) minmax(300px,.9fr);gap:18px}.panel{background:linear-gradient(180deg,#121d30,#0f1929);border:1px solid var(--line);border-radius:20px;overflow:hidden;box-shadow:0 14px 45px #0000001c}.panel-head{display:flex;align-items:center;justify-content:space-between;padding:17px 19px;border-bottom:1px solid var(--line);gap:12px}.panel-head h3{font-size:14px;margin:0}.sub{font-size:11px;color:var(--muted);margin-top:4px}.stage{position:relative;min-height:390px;aspect-ratio:16/10;background:linear-gradient(135deg,#0c1727,#172b42);display:grid;place-items:center;overflow:hidden}.stage video,.stage canvas,.stage img{position:absolute;width:100%;height:100%;object-fit:contain;inset:0}.stage canvas{pointer-events:none}.placeholder{text-align:center;padding:28px;max-width:400px;z-index:1}.camera-icon{height:72px;width:72px;margin:0 auto 16px;border-radius:23px;background:#172c43;border:1px solid #2b4863;display:grid;place-items:center;font-size:32px}.placeholder h4{margin:0 0 8px;font-size:17px}.placeholder p{color:var(--muted);font-size:12px;line-height:1.6;margin:0 auto 18px}.stage-footer{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 18px;flex-wrap:wrap}.btn{padding:11px 15px;border-radius:11px;font-size:12px;font-weight:750;display:inline-flex;align-items:center;justify-content:center;gap:8px}.primary{background:linear-gradient(135deg,var(--cyan),#68a7ff);color:#071320}.secondary{background:#1a2a41;color:var(--text);border:1px solid #30445e}.ghost{background:transparent;color:var(--muted);border:1px solid var(--line)}.danger{color:var(--red);background:#301b2a;border:1px solid #633147}.actions{display:flex;gap:8px;flex-wrap:wrap}.notice{padding:11px 18px;border-top:1px solid var(--line);font-size:11px;color:var(--muted);line-height:1.5}.notice strong{color:var(--amber)}
+.rightcol{display:flex;flex-direction:column;gap:18px}.statrow{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;padding:15px}.stat{padding:12px;background:#0d1727;border:1px solid var(--line);border-radius:12px}.stat b{display:block;font-size:22px;letter-spacing:-.04em}.stat span{font-size:10px;color:var(--muted)}.content{padding:16px 18px}.det-list{display:flex;flex-direction:column;gap:9px;max-height:260px;overflow:auto}.det-item{display:flex;align-items:center;gap:11px;padding:11px;background:#0d1727;border:1px solid #203149;border-radius:12px}.det-icon{width:36px;height:36px;border-radius:10px;display:grid;place-items:center;background:#172c43;font-size:18px}.det-info{min-width:0;flex:1}.det-info b{font-size:12px;display:block;text-transform:capitalize}.det-info small{font-size:10px;color:var(--muted)}.confidence{font-size:12px;font-weight:800;color:var(--green)}.empty{font-size:12px;color:var(--muted);text-align:center;padding:25px 12px;line-height:1.6}.settings{display:grid;gap:16px}.setting{display:flex;align-items:center;justify-content:space-between;gap:14px}.setting label{font-size:12px;font-weight:650}.setting small{display:block;font-size:10px;color:var(--muted);font-weight:400;margin-top:4px}.setting select{background:#0c1727;color:var(--text);border:1px solid var(--line);border-radius:9px;padding:8px;font-size:11px}.toggle{appearance:none;width:38px;height:22px;background:#34445b;border-radius:20px;position:relative;flex:none;cursor:pointer}.toggle:checked{background:#238c83}.toggle:before{content:"";position:absolute;left:3px;top:3px;width:16px;height:16px;background:white;border-radius:50%;transition:.15s}.toggle:checked:before{left:19px}.history{display:flex;flex-direction:column;gap:8px}.history-item{display:flex;justify-content:space-between;gap:10px;padding:10px 0;border-bottom:1px solid #203149;font-size:11px}.history-item:last-child{border:0}.history-item span{color:var(--muted)}.bottomgrid{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-top:18px}.uploadbox{border:1px dashed #3a526d;border-radius:13px;padding:15px;display:flex;align-items:center;justify-content:space-between;gap:12px}.uploadbox p{margin:0;color:var(--muted);font-size:11px;line-height:1.5}.uploadbox input{display:none}.footer{text-align:center;color:#60748e;font-size:10px;padding:24px 10px 10px}.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);padding:12px 16px;border-radius:12px;background:#e9f7ff;color:#091321;box-shadow:0 10px 35px #0005;font-size:12px;font-weight:700;z-index:10;display:none;max-width:90vw}.kbd{font-family:monospace;border:1px solid #3b4c63;border-radius:5px;padding:2px 5px;color:#b7c8de}
+@media(max-width:950px){.grid{grid-template-columns:1fr}.rightcol{display:grid;grid-template-columns:1fr 1fr}.rightcol .panel:first-child{grid-column:1/-1}.bottomgrid{grid-template-columns:1fr}.hero{align-items:flex-start;flex-direction:column}.hero-badge{white-space:normal}}
+@media(max-width:600px){.app{padding:13px}.topbar{align-items:flex-start}.top-right .chip:first-child{display:none}.brand h1{font-size:17px}.rightcol{display:flex}.stage{min-height:300px}.hero h2{font-size:30px}.stage-footer{align-items:flex-start}.actions{width:100%}.actions .btn{flex:1}}
+</style>
+</head>
+<body>
+<div class="app">
+  <header class="topbar">
+    <div class="brand"><div class="logo">◎</div><div><h1>OBJECTIQ</h1><p>REAL-TIME OBJECT RECOGNITION ASSISTANT</p></div></div>
+    <div class="top-right"><span class="chip">AI VISION LAB</span><span class="chip" id="statusChip">● Model not loaded</span></div>
+  </header>
+  <section class="hero">
+    <div><div class="eyebrow">See more. Understand faster.</div><h2>Your world, recognised in real time.</h2><p>Use your camera or upload an image to identify everyday objects. OBJECTIQ highlights detections, estimates confidence, and can read recognised labels aloud.</p></div>
+    <div class="hero-badge">✦ Browser-based AI · Camera stays on your device</div>
+  </section>
+
+  <main class="grid">
+    <section class="panel">
+      <div class="panel-head"><div><h3>Live vision workspace</h3><div class="sub">Camera feed and object bounding boxes</div></div><span class="chip" id="fpsChip">Ready</span></div>
+      <div class="stage" id="stage">
+        <div class="placeholder" id="placeholder"><div class="camera-icon">▣</div><h4>Start your vision session</h4><p>Allow camera access to recognise objects around you, or upload an image to try the demo without a camera.</p><button class="btn primary" id="startBtn">▶ Start camera</button></div>
+        <video id="video" autoplay muted playsinline hidden></video>
+        <img id="uploadedImage" alt="Uploaded image for object recognition" hidden>
+        <canvas id="overlay"></canvas>
+      </div>
+      <div class="stage-footer"><div class="actions"><button class="btn primary" id="startBtn2">▶ Start camera</button><button class="btn secondary" id="pauseBtn" disabled>Ⅱ Pause</button><button class="btn ghost" id="stopBtn" disabled>■ Stop</button></div><div class="actions"><button class="btn secondary" id="speakBtn" disabled>🔊 Read results</button><button class="btn secondary" id="extendedScanBtn">✦ Scan basic items</button><button class="btn ghost" id="clearBtn">Clear results</button></div></div>
+      <div class="notice"><strong>Privacy:</strong> camera processing runs in your browser after the AI model loads. This prototype does not send camera frames to a custom server. Model files are downloaded from a public CDN.</div>
+    </section>
+
+    <aside class="rightcol">
+      <section class="panel">
+        <div class="panel-head"><div><h3>Detection overview</h3><div class="sub">Current frame summary</div></div><span class="chip live"><span class="dot"></span>Monitor</span></div>
+        <div class="statrow"><div class="stat"><b id="objectsStat">0</b><span>Objects found</span></div><div class="stat"><b id="classesStat">0</b><span>Unique labels</span></div><div class="stat"><b id="bestStat">—</b><span>Top confidence</span></div></div>
+        <div class="content"><div class="sub" style="margin-bottom:10px">DETECTED OBJECTS</div><div class="det-list" id="detections"><div class="empty">No objects detected yet.<br>Start the camera or upload an image.</div></div></div>
+      </section>
+      <section class="panel">
+        <div class="panel-head"><div><h3>Assistant settings</h3><div class="sub">Tune your recognition experience</div></div></div>
+        <div class="content settings">
+          <div class="setting"><div><label for="threshold">Confidence threshold</label><small>Hide low-confidence predictions</small></div><select id="threshold"><option value=".35">35%</option><option value=".5" selected>50%</option><option value=".65">65%</option><option value=".8">80%</option></select></div>
+          <div class="setting"><div><label for="voiceToggle">Voice assistant</label><small>Speak object labels aloud</small></div><input class="toggle" type="checkbox" id="voiceToggle"></div>
+          <div class="setting"><div><label for="boxesToggle">Detection boxes</label><small>Draw labels around detected objects</small></div><input class="toggle" type="checkbox" id="boxesToggle" checked></div>
+          <div class="setting"><div><label for="repeatToggle">Announce new objects</label><small>Speak when a new label appears</small></div><input class="toggle" type="checkbox" id="repeatToggle"></div>
+        </div>
+      </section>
+      <section class="panel">
+        <div class="panel-head"><div><h3>Session activity</h3><div class="sub">Recent recognition events</div></div><button class="btn ghost" id="clearHistoryBtn" style="padding:7px 9px">Clear</button></div>
+        <div class="content"><div class="history" id="history"><div class="empty">Your session activity will appear here.</div></div></div>
+      </section>
+    </aside>
+  </main>
+
+  <div class="bottomgrid">
+    <section class="panel">
+      <div class="panel-head"><div><h3>Try an image</h3><div class="sub">Upload a JPG, PNG, or WebP picture for one-time detection</div></div></div>
+      <div class="content"><label class="uploadbox" for="fileInput"><p><b>Choose image</b><br>Best results with clear everyday objects.</p><span class="btn secondary">Browse files ↗</span></label><input id="fileInput" type="file" accept="image/*"></div>
+    </section>
+    <section class="panel">
+      <div class="panel-head"><div><h3>Supported object categories</h3><div class="sub">80 standard COCO-SSD classes</div></div><span class="chip">80 labels</span></div>
+      <div class="content" style="font-size:11px;line-height:1.9;color:var(--muted)">
+        <b style="color:var(--text)">People &amp; transport:</b> person, bicycle, car, motorcycle, airplane, bus, train, truck, boat.<br>
+        <b style="color:var(--text)">Street &amp; outdoor:</b> traffic light, fire hydrant, stop sign, parking meter, bench, bird, kite, frisbee, skis, snowboard, skateboard, surfboard.<br>
+        <b style="color:var(--text)">Animals:</b> cat, dog, horse, sheep, cow, elephant, bear, zebra, giraffe.<br>
+        <b style="color:var(--text)">Personal items &amp; sports:</b> backpack, umbrella, handbag, tie, suitcase, sports ball, baseball bat, baseball glove, tennis racket.<br>
+        <b style="color:var(--text)">Kitchen &amp; food:</b> bottle, wine glass, cup, fork, knife, spoon, bowl, banana, apple, sandwich, orange, broccoli, carrot, hot dog, pizza, donut, cake.<br>
+        <b style="color:var(--text)">Home &amp; electronics:</b> chair, couch, potted plant, bed, dining table, toilet, TV, laptop, mouse, remote, keyboard, cell phone, microwave, oven, toaster, sink, refrigerator, book, clock, vase, scissors, teddy bear, hair drier, toothbrush.
+      </div>
+    </section>
+    <section class="panel">
+      <div class="panel-head"><div><h3>About this prototype</h3><div class="sub">What is implemented</div></div></div>
+      <div class="content" style="font-size:12px;line-height:1.75;color:var(--muted)">
+        <b style="color:var(--text)">Implemented:</b> webcam access, image upload, live object detection, bounding boxes, confidence scores, threshold control, session activity, and browser text-to-speech.<br>
+        <b style="color:var(--text)">Model:</b> COCO-SSD via TensorFlow.js with the MobileNet V1 backbone. It supports the 80 standard COCO object categories listed below.<br>
+        <b style="color:var(--amber)">Limit:</b> this is not a general-purpose AI assistant. It only recognises classes supported by the model; performance depends on lighting, camera quality, and network access when loading the model.
+      </div>
+    </section>
+  </div>
+  <div class="footer">OBJECTIQ · Student prototype · Use responsibly and respect people’s privacy when using a camera.</div>
+</div>
+<div class="toast" id="toast"></div>
+<script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.20.0/dist/tf.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/coco-ssd@2.2.3/dist/coco-ssd.min.js"></script>
+<script>
+(() => {
+  const $ = id => document.getElementById(id);
+  const video = $('video'), canvas = $('overlay'), ctx = canvas.getContext('2d');
+  const image = $('uploadedImage'), placeholder = $('placeholder');
+  let model = null, extendedDetector = null, extendedLoading = false, stream = null, running = false, paused = false, frameBusy = false;
+  let rafId = null, lastLabels = new Set(), lastSpeakAt = 0, lastPredictions = [], eventCount = 0, lastFrameAt = 0;
+  const historyItems = [];
+
+  function toast(msg) {
+    const el=$('toast'); el.textContent=msg; el.style.display='block';
+    clearTimeout(toast.timer); toast.timer=setTimeout(()=>el.style.display='none',2600);
+  }
+  function status(msg, live=false) {
+    $('statusChip').textContent = live ? '● ' + msg : '● ' + msg;
+    $('statusChip').classList.toggle('live', live);
+  }
+  async function loadModel() {
+    if (model) return model;
+    if (!window.tf || !window.cocoSsd) throw new Error('AI model libraries could not load. Check your internet connection and refresh.');
+    status('Loading AI model…');
+    try {
+      await tf.ready();
+      model = await cocoSsd.load({base:'mobilenet_v1'});
+      status('AI model ready', true);
+      toast('Object recognition model is ready');
+      return model;
+    } catch(e) { status('Model failed to load'); throw e; }
+  }
+  function sizeCanvas(w,h) {
+    const dpr=window.devicePixelRatio||1;
+    canvas.width=Math.max(1,Math.round(w*dpr)); canvas.height=Math.max(1,Math.round(h*dpr));
+    canvas.style.width='100%'; canvas.style.height='100%';
+    ctx.setTransform(dpr,0,0,dpr,0,0);
+  }
+  function drawPredictions(preds, sourceW, sourceH) {
+    const rect=canvas.getBoundingClientRect();
+    const boxW=rect.width, boxH=rect.height;
+    sizeCanvas(boxW,boxH);
+    ctx.clearRect(0,0,boxW,boxH);
+    if (!$('boxesToggle').checked) return;
+    const scale=Math.min(boxW/sourceW,boxH/sourceH);
+    const offsetX=(boxW-sourceW*scale)/2, offsetY=(boxH-sourceH*scale)/2;
+    preds.forEach(p=>{
+      const [x,y,w,h]=p.bbox;
+      const bx=offsetX+x*scale, by=offsetY+y*scale, bw=w*scale, bh=h*scale;
+      ctx.lineWidth=2; ctx.strokeStyle='#47d9e8'; ctx.strokeRect(bx,by,bw,bh);
+      const label=`${p.class} ${(p.score*100).toFixed(0)}%`;
+      ctx.font='600 12px system-ui'; const tw=ctx.measureText(label).width+12;
+      ctx.fillStyle='#47d9e8'; ctx.fillRect(bx,Math.max(0,by-23),tw,22);
+      ctx.fillStyle='#06111e'; ctx.fillText(label,bx+6,Math.max(15,by-8));
+    });
+  }
+  function updateResults(preds) {
+    lastPredictions=preds;
+    $('objectsStat').textContent=preds.length;
+    $('classesStat').textContent=new Set(preds.map(p=>p.class)).size;
+    $('bestStat').textContent=preds.length ? Math.round(Math.max(...preds.map(p=>p.score))*100)+'%' : '—';
+    $('speakBtn').disabled=!preds.length;
+    const container=$('detections');
+    if(!preds.length){container.innerHTML='<div class="empty">No objects above the selected confidence threshold.</div>';return;}
+    container.innerHTML='';
+    preds.slice().sort((a,b)=>b.score-a.score).forEach(p=>{
+      const el=document.createElement('div'); el.className='det-item';
+      const iconMap={
+        person:'🧍',bicycle:'🚲',car:'🚗',motorcycle:'🏍️',airplane:'✈️',bus:'🚌',train:'🚆',truck:'🚚',boat:'⛵',
+        traffic_light:'🚦',fire_hydrant:'🧯',stop_sign:'🛑',parking_meter:'🅿️',bench:'🪑',bird:'🐦',cat:'🐈',dog:'🐕',
+        horse:'🐎',sheep:'🐑',cow:'🐄',elephant:'🐘',bear:'🐻',zebra:'🦓',giraffe:'🦒',backpack:'🎒',umbrella:'☂️',
+        handbag:'👜',tie:'👔',suitcase:'🧳',frisbee:'🥏',skis:'🎿',snowboard:'🏂',sports_ball:'⚽',kite:'🪁',
+        baseball_bat:'🏏',baseball_glove:'🧤',skateboard:'🛹',surfboard:'🏄',tennis_racket:'🎾',bottle:'🧴',
+        wine_glass:'🍷',cup:'☕',fork:'🍴',knife:'🔪',spoon:'🥄',bowl:'🥣',banana:'🍌',apple:'🍎',sandwich:'🥪',
+        orange:'🍊',broccoli:'🥦',carrot:'🥕',hot_dog:'🌭',pizza:'🍕',donut:'🍩',cake:'🍰',chair:'🪑',couch:'🛋️',
+        potted_plant:'🪴',bed:'🛏️',dining_table:'🍽️',toilet:'🚽',tv:'📺',laptop:'💻',mouse:'🖱️',remote:'🎛️',
+        keyboard:'⌨️',cell_phone:'📱',microwave:'♨️',oven:'🔥',toaster:'🍞',sink:'🚰',refrigerator:'🧊',
+        book:'📘',clock:'🕒',vase:'🏺',scissors:'✂️',teddy_bear:'🧸',hair_drier:'💨',toothbrush:'🪥'
+      };
+      const nice=p.class.replaceAll('_',' ');
+      el.innerHTML=`<div class="det-icon">${iconMap[p.class]||'◈'}</div><div class="det-info"><b></b><small>Detected in current frame</small></div><div class="confidence">${Math.round(p.score*100)}%</div>`;
+      el.querySelector('b').textContent=nice; container.appendChild(el);
+    });
+    if($('repeatToggle').checked && $('voiceToggle').checked){
+      const labels=new Set(preds.map(p=>p.class));
+      const fresh=[...labels].filter(l=>!lastLabels.has(l));
+      if(fresh.length && Date.now()-lastSpeakAt>2500){speakText('I can see '+fresh.slice(0,3).join(', ').replaceAll('_',' '));lastSpeakAt=Date.now();}
+      lastLabels=labels;
+    }
+  }
+  function addHistory(label,detail) {
+    eventCount++;
+    historyItems.unshift({label,detail,time:new Date().toLocaleTimeString([], {hour:'2-digit',minute:'2-digit',second:'2-digit'})});
+    historyItems.splice(6);
+    const h=$('history'); h.innerHTML='';
+    historyItems.forEach(item=>{
+      const el=document.createElement('div');el.className='history-item';
+      const left=document.createElement('b');left.textContent=item.label;
+      const right=document.createElement('span');right.textContent=item.time+' · '+item.detail;
+      el.append(left,right);h.appendChild(el);
+    });
+  }
+  async function detectLoop() {
+    if(!running || paused || frameBusy) { if(running&&!paused) rafId=requestAnimationFrame(detectLoop); return; }
+    if(video.readyState<2){rafId=requestAnimationFrame(detectLoop);return;}
+    frameBusy=true;
+    try{
+      const preds=await model.detect(video);
+      const filtered=preds.filter(p=>p.score>=Number($('threshold').value));
+      updateResults(filtered); drawPredictions(filtered,video.videoWidth,video.videoHeight);
+      const now=performance.now();
+      if(lastFrameAt) $('fpsChip').textContent=Math.round(1000/(now-lastFrameAt))+' FPS';
+      lastFrameAt=now;
+    }catch(e){console.error(e);}
+    finally{frameBusy=false;if(running&&!paused) rafId=requestAnimationFrame(detectLoop);}
+  }
+  const BASIC_ITEM_LABELS = [
+    'pen','pencil','marker','highlighter','eraser','ruler','notebook','spiral notebook','paper sheet',
+    'folder','scissors','glue stick','stapler','tape dispenser','calculator',
+    'water bottle','plastic bottle','thermos flask','mug','glass cup','lunch box','plate',
+    'school bag','backpack','handbag','tote bag','wallet','purse','shopping bag','suitcase',
+    'key','keychain','eyeglasses','sunglasses','wristwatch','ring','bracelet',
+    'mobile phone','phone charger','charging cable','earphones','headphones','power bank','computer mouse',
+    'remote control','USB flash drive','keyboard','laptop','tablet','tissue box','soap bottle',
+    'toothbrush','toothpaste','comb','hair brush','shoe','sandal','slipper','cap','hat','umbrella',
+    'toy car','building block','ball','teddy bear','plant pot','food container','snack packet','can','milk carton'
+  ];
+
+  async function loadExtendedDetector() {
+    if (extendedDetector) return extendedDetector;
+    if (extendedLoading) throw new Error('Extended model is already loading');
+    extendedLoading = true;
+    const btn = $('extendedScanBtn');
+    const oldLabel = btn.textContent;
+    btn.disabled = true;
+    btn.textContent = 'Loading extra-item model…';
+    status('Loading extended model…');
+    try {
+      const { pipeline, env } = await import('https://cdn.jsdelivr.net/npm/@xenova/transformers@2.17.2');
+      env.allowLocalModels = false;
+      extendedDetector = await pipeline('zero-shot-object-detection', 'Xenova/owlvit-base-patch32');
+      status('Extended model ready', true);
+      toast('Extended item model is ready');
+      return extendedDetector;
+    } catch (e) {
+      status(model ? 'AI model ready' : 'Model not loaded', !!model);
+      toast('Could not load extended model. Check internet access and try again.');
+      console.error(e);
+      throw e;
+    } finally {
+      extendedLoading = false;
+      btn.disabled = false;
+      btn.textContent = oldLabel;
+    }
+  }
+
+  async function scanForBasicItems() {
+    try {
+      const detector = await loadExtendedDetector();
+      let source, sw, sh;
+      if (running && !paused && video.readyState >= 2) {
+        const frame = document.createElement('canvas');
+        frame.width = video.videoWidth; frame.height = video.videoHeight;
+        frame.getContext('2d').drawImage(video, 0, 0, frame.width, frame.height);
+        source = frame; sw = frame.width; sh = frame.height;
+      } else if (!image.hidden && image.complete && image.naturalWidth) {
+        source = image; sw = image.naturalWidth; sh = image.naturalHeight;
+      } else {
+        toast('Start the camera or upload an image before scanning extra items.');
+        return;
+      }
+      const threshold = Math.max(0.08, Number($('threshold').value) * 0.7);
+      toast('Scanning for pens, bags, keys and other basic items…');
+      const results = await detector(source, BASIC_ITEM_LABELS, { threshold, percentage: false });
+      const mapped = (results || []).map(r => {
+        const b = r.box || {};
+        const x1 = Number(b.xmin ?? b.x_min ?? 0), y1 = Number(b.ymin ?? b.y_min ?? 0);
+        const x2 = Number(b.xmax ?? b.x_max ?? 0), y2 = Number(b.ymax ?? b.y_max ?? 0);
+        return {class:String(r.label || 'object').toLowerCase().replaceAll(' ',' '),
+          score:Number(r.score || 0), bbox:[x1,y1,Math.max(0,x2-x1),Math.max(0,y2-y1)]};
+      }).filter(p => p.score >= threshold && p.bbox[2] > 0 && p.bbox[3] > 0);
+      updateResults(mapped);
+      drawPredictions(mapped, sw, sh);
+      $('fpsChip').textContent = 'Extended scan';
+      addHistory('Extended item scan', mapped.length + ' item(s)');
+      if ($('voiceToggle').checked && mapped.length) {
+        speakText('Possible items: ' + [...new Set(mapped.map(p => p.class))].slice(0,6).join(', '));
+      }
+      if (!mapped.length) toast('No extra items found confidently. Try a clearer, closer image.');
+    } catch (e) { console.error(e); }
+  }
+
+  async function startCamera() {
+    try {
+      await loadModel();
+      if(!navigator.mediaDevices?.getUserMedia) throw new Error('Camera access is not available. Use localhost or HTTPS in a modern browser.');
+      if(stream) stream.getTracks().forEach(t=>t.stop());
+      stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:'environment'},audio:false});
+      video.srcObject=stream; video.hidden=false; image.hidden=true; placeholder.hidden=true;
+      await new Promise(resolve=>video.onloadedmetadata=resolve);
+      await video.play();
+      running=true;paused=false;lastLabels=new Set();
+      $('startBtn').disabled=true;$('startBtn2').disabled=true;$('pauseBtn').disabled=false;$('stopBtn').disabled=false;
+      $('pauseBtn').textContent='Ⅱ Pause'; status('Camera active',true);
+      addHistory('Camera started','live vision');
+      sizeCanvas(video.videoWidth,video.videoHeight);
+      cancelAnimationFrame(rafId);rafId=requestAnimationFrame(detectLoop);
+    }catch(e){status('Not connected');toast(e.message||'Could not start camera.');console.error(e);}
+  }
+  function stopCamera() {
+    running=false;paused=false;cancelAnimationFrame(rafId);
+    if(stream){stream.getTracks().forEach(t=>t.stop());stream=null;}
+    video.srcObject=null;video.hidden=true;
+    $('startBtn').disabled=false;$('startBtn2').disabled=false;$('pauseBtn').disabled=true;$('stopBtn').disabled=true;
+    $('pauseBtn').textContent='Ⅱ Pause';status(model?'AI model ready':'Model not loaded',!!model);
+    $('fpsChip').textContent='Stopped';ctx.clearRect(0,0,canvas.width,canvas.height);
+    if(!image.src || image.hidden) placeholder.hidden=false;
+    addHistory('Camera stopped','session');
+  }
+  function speakText(text) {
+    if(!('speechSynthesis' in window)){toast('Text-to-speech is not supported in this browser.');return;}
+    speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(text);u.rate=1;u.pitch=1;speechSynthesis.speak(u);
+  }
+  async function detectUploaded(file) {
+    if(!file || !file.type.startsWith('image/')) return;
+    try{
+      await loadModel();
+      if(stream) stopCamera();
+      const url=URL.createObjectURL(file);
+      image.onload=async()=>{
+        image.hidden=false;video.hidden=true;placeholder.hidden=true;
+        const preds=(await model.detect(image)).filter(p=>p.score>=Number($('threshold').value));
+        updateResults(preds);drawPredictions(preds,image.naturalWidth,image.naturalHeight);
+        $('fpsChip').textContent='Image scan';status('Image analysed',true);
+        addHistory('Image analysed',preds.length+' object(s)');
+        if($('voiceToggle').checked && preds.length) speakText('I can see '+[...new Set(preds.map(p=>p.class.replaceAll('_',' ')))].slice(0,5).join(', '));
+        URL.revokeObjectURL(url);
+      };
+      image.src=url;
+    }catch(e){toast(e.message||'Could not analyse image.');}
+  }
+  $('startBtn').addEventListener('click',startCamera);$('startBtn2').addEventListener('click',startCamera);
+  $('stopBtn').addEventListener('click',stopCamera);
+  $('pauseBtn').addEventListener('click',()=>{
+    if(!running)return;paused=!paused;
+    $('pauseBtn').textContent=paused?'▶ Resume':'Ⅱ Pause';
+    status(paused?'Camera paused':'Camera active',!paused);
+    if(!paused){rafId=requestAnimationFrame(detectLoop);}else cancelAnimationFrame(rafId);
+  });
+  $('extendedScanBtn').addEventListener('click', scanForBasicItems);
+  $('speakBtn').addEventListener('click',()=>{
+    if(lastPredictions.length)speakText('Detected objects: '+[...new Set(lastPredictions.map(p=>p.class.replaceAll('_',' ')))].join(', '));
+  });
+  $('clearBtn').addEventListener('click',()=>{
+    updateResults([]);ctx.clearRect(0,0,canvas.width,canvas.height);lastLabels=new Set();toast('Detection results cleared');
+  });
+  $('clearHistoryBtn').addEventListener('click',()=>{historyItems.length=0;$('history').innerHTML='<div class="empty">Your session activity will appear here.</div>';eventCount=0;});
+  $('fileInput').addEventListener('change',e=>detectUploaded(e.target.files[0]));
+  $('threshold').addEventListener('change',()=>{
+    if(image.src&&!image.hidden)detectUploadedFromCurrentImage();
+  });
+  async function detectUploadedFromCurrentImage(){
+    if(!model||image.hidden)return;
+    const preds=(await model.detect(image)).filter(p=>p.score>=Number($('threshold').value));
+    updateResults(preds);drawPredictions(preds,image.naturalWidth,image.naturalHeight);
+  }
+  $('boxesToggle').addEventListener('change',()=>{if(! $('boxesToggle').checked)ctx.clearRect(0,0,canvas.width,canvas.height);else if(running)drawPredictions(lastPredictions,video.videoWidth,video.videoHeight);else if(!image.hidden)drawPredictions(lastPredictions,image.naturalWidth,image.naturalHeight);});
+  $('voiceToggle').addEventListener('change',()=>{if(!$('voiceToggle').checked&&'speechSynthesis'in window)speechSynthesis.cancel();});
+  window.addEventListener('resize',()=>{if(running)drawPredictions(lastPredictions,video.videoWidth,video.videoHeight);else if(!image.hidden)drawPredictions(lastPredictions,image.naturalWidth,image.naturalHeight);});
+  window.addEventListener('beforeunload',()=>{if(stream)stream.getTracks().forEach(t=>t.stop());});
+})();
+</script>
+</body>
+</html>
